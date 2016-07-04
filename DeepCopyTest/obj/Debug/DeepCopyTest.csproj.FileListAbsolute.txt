@@ -1,0 +1,18 @@
+c:\users\vadimr\documents\visual studio 2013\Projects\DeepCopyTest\DeepCopyTest\bin\Debug\DeepCopyTest.exe.config
+c:\users\vadimr\documents\visual studio 2013\Projects\DeepCopyTest\DeepCopyTest\bin\Debug\DeepCopyTest.exe
+c:\users\vadimr\documents\visual studio 2013\Projects\DeepCopyTest\DeepCopyTest\bin\Debug\DeepCopyTest.pdb
+c:\users\vadimr\documents\visual studio 2013\Projects\DeepCopyTest\DeepCopyTest\obj\Debug\DeepCopyTest.csprojResolveAssemblyReference.cache
+c:\users\vadimr\documents\visual studio 2013\Projects\DeepCopyTest\DeepCopyTest\obj\Debug\DeepCopyTest.exe
+c:\users\vadimr\documents\visual studio 2013\Projects\DeepCopyTest\DeepCopyTest\obj\Debug\DeepCopyTest.pdb
+C:\Users\Developer\Desktop\DeepCopyTest\DeepCopyTest\bin\Debug\DeepCopyTest.exe.config
+C:\Users\Developer\Desktop\DeepCopyTest\DeepCopyTest\obj\Debug\DeepCopyTest.exe
+C:\Users\Developer\Desktop\DeepCopyTest\DeepCopyTest\obj\Debug\DeepCopyTest.pdb
+C:\Users\Developer\Desktop\DeepCopyTest\DeepCopyTest\bin\Debug\DeepCopyTest.exe
+C:\Users\Developer\Desktop\DeepCopyTest\DeepCopyTest\bin\Debug\DeepCopyTest.pdb
+C:\Users\Developer\Desktop\DeepCopyTest\DeepCopyTest\obj\Debug\DeepCopyTest.csprojResolveAssemblyReference.cache
+C:\Users\Developer\Desktop\TeseterGeneric\DeepCopyTest\DeepCopyTest\bin\Debug\DeepCopyTest.exe.config
+C:\Users\Developer\Desktop\TeseterGeneric\DeepCopyTest\DeepCopyTest\obj\Debug\DeepCopyTest.exe
+C:\Users\Developer\Desktop\TeseterGeneric\DeepCopyTest\DeepCopyTest\obj\Debug\DeepCopyTest.pdb
+C:\Users\Developer\Desktop\TeseterGeneric\DeepCopyTest\DeepCopyTest\bin\Debug\DeepCopyTest.exe
+C:\Users\Developer\Desktop\TeseterGeneric\DeepCopyTest\DeepCopyTest\bin\Debug\DeepCopyTest.pdb
+C:\Users\Developer\Desktop\TeseterGeneric\DeepCopyTest\DeepCopyTest\obj\Debug\DeepCopyTest.csprojResolveAssemblyReference.cache
