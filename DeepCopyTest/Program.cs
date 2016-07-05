@@ -18,7 +18,7 @@ namespace DeepCopyTest
 
             baseClass.payload = new MyNamespace.Test();
             baseClass.payload.listValueType = new List<string>();// .Add("str");
-            baseClass.payload.listValueType.Add("D");
+            baseClass.payload.listValueType.Add("A");
             baseClass.payload.listValueType.Add("jek");
             baseClass.payload.listValueType.Add("vad");
             baseClass.Error = new MyNamespace.ErrorClass { Description = "Erorr Detected", ID = 100 };
