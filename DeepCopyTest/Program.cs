@@ -197,6 +197,7 @@ namespace DeepCopyTest
 									}
 									else
 									{
+                                        //Create Instance of Inherited type of object we want to copy with different namespace 
 										var o = Activator.CreateInstance(itemType.Assembly.FullName, itemType.Namespace + "." + item.GetType().Name);
 
 										Type dynamicType = o.Unwrap().GetType();
