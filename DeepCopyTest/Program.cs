@@ -7,22 +7,19 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DeepCopyTest
-{ 
+{
     class Program
     {
         static void Main(string[] args)
         {
 
             MyNamespace.BaseClass<MyNamespace.Test> baseClass = new MyNamespace.BaseClass<MyNamespace.Test>();
-
-
             baseClass.payload = new MyNamespace.Test();
             baseClass.payload.listValueType = new List<string>();// .Add("str");
             baseClass.payload.listValueType.Add("A");
             baseClass.payload.listValueType.Add("jek");
             baseClass.payload.listValueType.Add("vad");
             baseClass.Error = new MyNamespace.ErrorClass { Description = "Erorr Detected", ID = 100 };
-
             BaseClass<Test> clonedObjTest = (BaseClass<Test>)DeepCopyObjectCopy(baseClass, typeof(BaseClass<Test>));
 
 
@@ -33,239 +30,242 @@ namespace DeepCopyTest
 
         }
 
+        //Still In Development
+        public static object DeepCopyObjectCopy<T>(T source, Type destinationType, bool isDynamicType = false)
+        {
 
-		public static object DeepCopyObjectCopy<T>(T source, Type destinationType, bool isDynamicType = false)
-		{
-
-			object destinationObject = Activator.CreateInstance(destinationType);
-			string nameSpace = source.GetType().Namespace;
-			PropertyInfo[] propertyInfosSource, propertyInfosDestination;
-			propertyInfosSource = source.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-			propertyInfosDestination = destinationObject.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-
-
-			foreach (PropertyInfo p in propertyInfosSource)
-			{
+            object destinationObject = Activator.CreateInstance(destinationType);
+            string nameSpace = source.GetType().Namespace;
+            PropertyInfo[] propertyInfosSource, propertyInfosDestination;
+            //Get All properties of your request object you want to copy 
+            propertyInfosSource = source.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+            propertyInfosDestination = destinationObject.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
 
 
-				PropertyInfo pReference = propertyInfosDestination.FirstOrDefault(e => e.Name == p.Name);
-				object valObj = p.GetValue(source, null);
+            foreach (PropertyInfo p in propertyInfosSource)
+            {
 
-				if (valObj != null && pReference != null)//// 
-				{
+                //Important:  copy only existing property in object i.e 
+                //Property, like extension data which often returned with object, after wcf DataContractSerializer add it 
+                PropertyInfo pReference = propertyInfosDestination.FirstOrDefault(e => e.Name == p.Name);
+                object valObj = p.GetValue(source, null);
 
-
-					//When regular type or object from desired namespace
-					if (!valObj.GetType().IsGenericType)
-					{
-
-						if (valObj.GetType().Namespace != nameSpace)
-							pReference.SetValue(destinationObject, valObj, null);
-						else
-						{
-							if ((valObj.GetType().BaseType == typeof(Enum)))
-							{
-								pReference.SetValue(destinationObject, valObj, null);
-							}
-							else
-							{
-								object obj = DeepCopyObjectCopy(valObj, Type.GetType(pReference.PropertyType.FullName));
-								pReference.SetValue(destinationObject, obj, null);
-							}
-						}
-					}
-
-					//Dictionary
-					#region DICTIONARY
-					if (p.PropertyType.Name == typeof(Dictionary<,>).Name)
-					{
-						var DictionaryType = Type.GetType(pReference.PropertyType.FullName);
+                if (valObj != null && pReference != null)//// 
+                {
 
 
-						Type[] arguments = pReference.PropertyType.GetGenericArguments(); //types of dicationary arguments: key & value
+                    //Not Generic Type object Like Ilist<T>
+                    if (!valObj.GetType().IsGenericType)
+                    {
 
-						Type keyType = arguments[0];    //type of dictionary key
-						Type valueType = arguments[1];  //type of dictionary value
+                        if (valObj.GetType().Namespace != nameSpace)
+                            pReference.SetValue(destinationObject, valObj, null);
+                        else
+                        {
+                            if ((valObj.GetType().BaseType == typeof(Enum)))
+                            {
+                                pReference.SetValue(destinationObject, valObj, null);
+                            }
+                            else
+                            {
+                                object obj = DeepCopyObjectCopy(valObj, Type.GetType(pReference.PropertyType.FullName));
+                                pReference.SetValue(destinationObject, obj, null);
+                            }
+                        }
+                    }
 
-
-						Type dictToCreate = typeof(Dictionary<,>).MakeGenericType(arguments);
-						var Result = (IDictionary)Activator.CreateInstance(dictToCreate);
-
-
-						foreach (DictionaryEntry item in (IDictionary)valObj)
-						{
-							object keyObj, valueObj;
-
-							if (keyType == typeof(string))
-								keyObj = item.Key;
-							else
-							{
-								if (keyType.IsValueType)
-									keyObj = DeepCopyObjectCopy(item.Key, keyType);
-								else
-									keyObj = item.Key;
-							}
-
-							if (valueType == typeof(string))
-								valueObj = item.Value;
-							else
-							{
-
-								if (valueType.IsValueType)
-									valueObj = DeepCopyObjectCopy(item.Value, valueType);
-								else
-									valueObj = item.Value;
-							}
-
-							var add = Result.GetType().GetMethod("Add", new[] { keyType, valueType });
-							Result.GetType().GetMethod("Add").Invoke(Result, new object[] { keyObj, valueObj });
-
-						}
-
-						pReference.SetValue(destinationObject, Result, null);
-
-					}
-					#endregion
-					//When Object is generic list with type of desired object to copy 
-					if (valObj.GetType().IsGenericType && p.PropertyType.Name != typeof(Dictionary<,>).Name)
-					{
-
-						var listType = Type.GetType(pReference.PropertyType.FullName);
-
-						Type itemType;
-						#region Array Generic Type Copy
-						if (listType.IsArray)
-						{
-							itemType = listType.GetElementType();
+                    //Dictionary
+                    #region DICTIONARY
+                    if (p.PropertyType.Name == typeof(Dictionary<,>).Name)
+                    {
+                        var DictionaryType = Type.GetType(pReference.PropertyType.FullName);
 
 
-							object d = Array.CreateInstance(itemType, ((IList)valObj).Count);
+                        Type[] arguments = pReference.PropertyType.GetGenericArguments(); //types of dicationary arguments: key & value
 
-							int ind = ((IList)valObj).Count;
-
-
-							for (int i = 0; i < ind; i++)
-							{
-
-								if (((IList)valObj)[i].GetType() == typeof(string))
-								{
-									object f = ((IList)valObj)[i];
-									((T[])d)[i] = (T)f;
-
-								}
-
-							}
-							pReference.SetValue(destinationObject, d, null);
+                        Type keyType = arguments[0];    //type of dictionary key
+                        Type valueType = arguments[1];  //type of dictionary value
 
 
-						}
-						#endregion 
-						else
-						{
-
-							itemType = listType.GetGenericArguments()[0];
+                        Type dictToCreate = typeof(Dictionary<,>).MakeGenericType(arguments);
+                        var Result = (IDictionary)Activator.CreateInstance(dictToCreate);
 
 
-							var IListRef = typeof(List<>);
-							Type[] IListParam = { itemType };
-							//itemType
-							object Result = Activator.CreateInstance(IListRef.MakeGenericType(IListParam));
-							foreach (var item in (IList)valObj)
-							{
+                        foreach (DictionaryEntry item in (IDictionary)valObj)
+                        {
+                            object keyObj, valueObj;
 
-								if (item.GetType() == typeof(string) || item.GetType().IsValueType) //String or ValueType
-								{
-									Result.GetType().GetMethod("Add").Invoke(Result, new[] { item });
-								}
-								else
-								{
-									//Get Run Time Type of Item!!!
+                            if (keyType == typeof(string))
+                                keyObj = item.Key;
+                            else
+                            {
+                                if (keyType.IsValueType)
+                                    keyObj = DeepCopyObjectCopy(item.Key, keyType);
+                                else
+                                    keyObj = item.Key;
+                            }
 
-									if (itemType.IsGenericType)
-									{
-										var InnerlistType = Type.GetType(itemType.FullName);
-										Type itemInnerType = InnerlistType.GetGenericArguments()[0];
-										var IInnerListRef = typeof(List<>);
-										Type[] IInnerListParam = { itemInnerType };
+                            if (valueType == typeof(string))
+                                valueObj = item.Value;
+                            else
+                            {
 
-										object InnerResult = Activator.CreateInstance(IInnerListRef.MakeGenericType(IInnerListParam));
+                                if (valueType.IsValueType)
+                                    valueObj = DeepCopyObjectCopy(item.Value, valueType);
+                                else
+                                    valueObj = item.Value;
+                            }
 
-										object obj = CopyList(item, itemType);
+                            var add = Result.GetType().GetMethod("Add", new[] { keyType, valueType });
+                            Result.GetType().GetMethod("Add").Invoke(Result, new object[] { keyObj, valueObj });
 
-										//object obj = DeepCopyObjectCopy(item, itemType);
-										Result.GetType().GetMethod("Add").Invoke(Result, new[] { obj });
-									}
-									else
-									{
+                        }
+
+                        pReference.SetValue(destinationObject, Result, null);
+
+                    }
+                    #endregion
+                    //When Object is generic list an not Dictionary
+                    if (valObj.GetType().IsGenericType && p.PropertyType.Name != typeof(Dictionary<,>).Name)
+                    {
+
+                        var listType = Type.GetType(pReference.PropertyType.FullName);
+
+                        Type itemType;
+                        #region Array Generic Type Copy
+                        if (listType.IsArray)
+                        {
+                            itemType = listType.GetElementType();
+
+
+                            object d = Array.CreateInstance(itemType, ((IList)valObj).Count);
+
+                            int ind = ((IList)valObj).Count;
+
+
+                            for (int i = 0; i < ind; i++)
+                            {
+
+                                if (((IList)valObj)[i].GetType() == typeof(string))
+                                {
+                                    object f = ((IList)valObj)[i];
+                                    ((T[])d)[i] = (T)f;
+
+                                }
+
+                            }
+                            pReference.SetValue(destinationObject, d, null);
+
+
+                        }
+                        #endregion
+                        else
+                        {
+
+                            itemType = listType.GetGenericArguments()[0];
+
+
+                            var IListRef = typeof(List<>);
+                            Type[] IListParam = { itemType };
+                            //itemType
+                            object Result = Activator.CreateInstance(IListRef.MakeGenericType(IListParam));
+                            foreach (var item in (IList)valObj)
+                            {
+
+                                if (item.GetType() == typeof(string) || item.GetType().IsValueType) //String or ValueType
+                                {
+                                    Result.GetType().GetMethod("Add").Invoke(Result, new[] { item });
+                                }
+                                else
+                                {
+                                    //Get Run Time Type of Item!!!
+
+                                    if (itemType.IsGenericType)
+                                    {
+                                        var InnerlistType = Type.GetType(itemType.FullName);
+                                        Type itemInnerType = InnerlistType.GetGenericArguments()[0];
+                                        var IInnerListRef = typeof(List<>);
+                                        Type[] IInnerListParam = { itemInnerType };
+
+                                        object InnerResult = Activator.CreateInstance(IInnerListRef.MakeGenericType(IInnerListParam));
+
+                                        object obj = CopyList(item, itemType);
+
+                                        //object obj = DeepCopyObjectCopy(item, itemType);
+                                        Result.GetType().GetMethod("Add").Invoke(Result, new[] { obj });
+                                    }
+                                    else
+                                    {
                                         //Create Instance of Inherited type of object we want to copy with different namespace 
-										var o = Activator.CreateInstance(itemType.Assembly.FullName, itemType.Namespace + "." + item.GetType().Name);
+                                        var o = Activator.CreateInstance(itemType.Assembly.FullName, itemType.Namespace + "." + item.GetType().Name);
 
-										Type dynamicType = o.Unwrap().GetType();
-										object obj = DeepCopyObjectCopy(item, dynamicType);
-										Result.GetType().GetMethod("Add").Invoke(Result, new[] { obj });
-									}
-
-								
-
-								}
-							}
-
-							pReference.SetValue(destinationObject, Result, null);
-
-						}
-					}
-				}
-
-			}
-
-
-			return destinationObject;
-		}
+                                        Type dynamicType = o.Unwrap().GetType();
+                                        object obj = DeepCopyObjectCopy(item, dynamicType);
+                                        Result.GetType().GetMethod("Add").Invoke(Result, new[] { obj });
+                                    }
 
 
 
-		public static object CopyList<T>(T Source, Type destinationType)
-		{
-		   object destinationObject = Activator.CreateInstance(destinationType);
+                                }
+                            }
 
-		   if (destinationType.IsGenericType) {
-			  var  itemType = destinationType.GetGenericArguments()[0];
-			   var IListRef = typeof(List<>);
-			   Type[] IListParam = { itemType };
-			   //itemType
-			   object Result = Activator.CreateInstance(IListRef.MakeGenericType(IListParam));
-			   foreach (var item in (IList)Source)
-			   {
+                            pReference.SetValue(destinationObject, Result, null);
 
-				   if (item.GetType() == typeof(string) || item.GetType().IsValueType) //String or ValueType
-				   {
-					   Result.GetType().GetMethod("Add").Invoke(Result, new[] { item });
-				   }
-				   else
-				   {
+                        }
+                    }
+                }
 
-					   if (itemType.IsGenericType)
-					   {
-						   object obj = DeepCopyObjectCopy(item, itemType);
-						   Result.GetType().GetMethod("Add").Invoke(Result, new[] { obj });
-					   }
-					   else
-					   {
-						   var o = Activator.CreateInstance(itemType.Assembly.FullName, itemType.Namespace + "." + item.GetType().Name);
-						   Type dynamicType = o.Unwrap().GetType();
-						   object obj = DeepCopyObjectCopy(item, dynamicType);
-						   Result.GetType().GetMethod("Add").Invoke(Result, new[] { obj });
-					   }
+            }
 
-           
 
-				   }
-			   }
-			   destinationObject = Result;
-		   }
-		   return destinationObject;
+            return destinationObject;
+        }
 
-		}
+
+        //Method will help to main algorith to copy List of Lists 
+        public static object CopyList<T>(T Source, Type destinationType)
+        {
+            object destinationObject = Activator.CreateInstance(destinationType);
+
+            if (destinationType.IsGenericType)
+            {
+                var itemType = destinationType.GetGenericArguments()[0];
+                var IListRef = typeof(List<>);
+                Type[] IListParam = { itemType };
+                //itemType
+                object Result = Activator.CreateInstance(IListRef.MakeGenericType(IListParam));
+                foreach (var item in (IList)Source)
+                {
+
+                    if (item.GetType() == typeof(string) || item.GetType().IsValueType) //String or ValueType
+                    {
+                        Result.GetType().GetMethod("Add").Invoke(Result, new[] { item });
+                    }
+                    else
+                    {
+
+                        if (itemType.IsGenericType)
+                        {
+                            object obj = DeepCopyObjectCopy(item, itemType);
+                            Result.GetType().GetMethod("Add").Invoke(Result, new[] { obj });
+                        }
+                        else
+                        {
+                            var o = Activator.CreateInstance(itemType.Assembly.FullName, itemType.Namespace + "." + item.GetType().Name);
+                            Type dynamicType = o.Unwrap().GetType();
+                            object obj = DeepCopyObjectCopy(item, dynamicType);
+                            Result.GetType().GetMethod("Add").Invoke(Result, new[] { obj });
+                        }
+
+
+
+                    }
+                }
+                destinationObject = Result;
+            }
+            return destinationObject;
+
+        }
 
     }
 
