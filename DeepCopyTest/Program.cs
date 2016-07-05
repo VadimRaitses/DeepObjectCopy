@@ -243,9 +243,6 @@ namespace DeepCopyTest
 				   else
 				   {
 
-					   // CREATE NEW UPDA FOR LIST IN LIST NEw UPdate For LISt IN LIST 
-					   //Get Run Time Type of Item!!!
-
 					   if (itemType.IsGenericType)
 					   {
 						   object obj = DeepCopyObjectCopy(item, itemType);
