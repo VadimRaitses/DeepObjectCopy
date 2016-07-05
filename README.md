@@ -1,3 +1,7 @@
 "# DeepObjectCopy" 
 Deep copy is algorithm to copy c# objects from one namespace to another
-Very useful for work with some client proxy references which exisiting in logic library to another server endpoints (in LAN for example), by requesting with the same objects and same objects came in response. 
+very useful for work with different references to same server endpoints(dmz to lan for example) when proxy reference is existing in another dll (BL)
+
+for example MayNamespace1.FooRequest to MyNamespace.ProxyClass.FooRequest
+or 
+ MayNamespace1.FooResponse to MyNamespace.ProxyClass.FooResponse
